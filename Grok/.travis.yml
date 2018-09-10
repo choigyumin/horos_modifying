@@ -1,0 +1,37 @@
+language: cpp
+matrix:
+  include:
+  - os: osx
+    compiler: clang
+    env: GROK_CI_ARCH=x86_64 GROK_CI_BUILD_CONFIGURATION=Release GROK_CI_INCLUDE_IF_DEPLOY=1 GROK_NONCOMMERCIAL=1
+  - os: linux
+    dist: trusty
+    sudo: required
+    compiler: g++
+    env: GROK_CI_ARCH=x86_64 GROK_CI_BUILD_CONFIGURATION=Release GROK_CI_INCLUDE_IF_DEPLOY=1
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - gcc-5
+        - g++-5
+install:
+- "./tools/travis-ci/install.sh"
+script:
+- "./tools/travis-ci/run.sh"
+before_deploy:
+- export GROK_RELEASE_PKG_FILE=$(ls build/grok-${TRAVIS_TAG}*)
+- echo "deploying $GROK_RELEASE_PKG_FILE to GitHub releases"
+deploy:
+  provider: releases
+  api_key:
+    secure: arQCTW0MtQ9xvGbUkTKR2yKpz8NZ9Nz1U3uWWktDJpzSGbRimVQx6+CWCyuOYGQ1cZDBX33jSOudO142sLJD6AsZBM3meKgRWv58O3VCwwdJBZRS2tsIE8STe/agthw8AYfw6/KVq95fTRS32fjaoce30rft5QvZI5Y/D3p4tP8d9o6imHa+o0jPMUoBq9eM2sd6AmEZh26sHMOF50zTw0engsnTOVuSqPtrrZNV1Vz/NWQFRwKtL3KElY7bcMN7oYLniQbKG+NpM1TK0oQqGvbR3gxkLaC44+48bWD6eYeQqnr5G0qPH9t1xTXZZAJals4vKNjnLUXojbH8wWg2Kv3LLaqUOnUZ7qSijekEyouYGsTp7fxdB43qsLQ6ooX3jTwMfR9MRio+yc5AaPJABwLAgH7dChqeGomJ3P3ysiYEOMB3eccANamLtr1bOCcreQnLnEjN5OGxO6hjmFXhRGL/5EofEj5TrtqpH3bZdzo0eklV8QVMhkSJMMSjng0oCP4NmA8Jqii8gxegOOjtcc843xYG6PlYCiC42IzAqLwG8HalC467ndz6B68Jq3VHkmXeOAosRIOSBfTa9LXFhup0AzYzmvHObaD8MQZUx9ekYTPaUYz7wLoSaTEJ+Rtiz2XYvN9BY9WoAKjlDan/7ENm97eXAQqKz1fli+db4wg=
+  file_glob: true
+  file: "${GROK_RELEASE_PKG_FILE}"
+  skip_cleanup: true
+  on:
+    repo: GrokImageCompression/grok
+    tags: true
+    condition: "$GROK_CI_INCLUDE_IF_DEPLOY = 1"
+

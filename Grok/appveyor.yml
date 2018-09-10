@@ -1,0 +1,33 @@
+version: 2.3.0.{build}
+clone_depth: 50
+environment:
+  matrix:
+  - GROK_CI_ARCH: x86
+    GROK_CI_VSCOMNTOOLS: $(VS140COMNTOOLS)
+    GROK_NONCOMMERCIAL: 1
+    GROK_CI_INCLUDE_IF_DEPLOY: 1
+  - GROK_CI_ARCH: x64
+    GROK_CI_VSCOMNTOOLS: $(VS140COMNTOOLS)
+    GROK_NONCOMMERCIAL: 1
+    GROK_CI_INCLUDE_IF_DEPLOY: 1
+install:
+- cmd: c:\cygwin\bin\bash ./tools/travis-ci/install.sh
+build_script:
+- cmd: >-
+    "%GROK_CI_VSCOMNTOOLS%..\..\VC\vcvarsall.bat" %GROK_CI_ARCH%
+
+    bash ./tools/travis-ci/run.sh
+test: off
+deploy:
+  #release: grok-$(appveyor_repo_tag_name)
+  description: 'Grok $(appveyor_repo_tag_name) has been released.'
+  provider: GitHub
+  auth_token:
+    secure: FtYzcjnMCkJfBzRwxQCQWuojEbJm3+N0L+tVRTzJc2B0ZlcWQE8ph0xbrRAjfJJy
+  artifact: /.*\.zip/            # upload all zip packages to release assets
+  draft: false
+  prerelease: false
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  on:
+    appveyor_repo_tag: true        # deploy on tag push only
+    GROK_CI_INCLUDE_IF_DEPLOY: 1
