@@ -13537,6 +13537,8 @@ static NSString * const O2PasteboardTypeEventModifierFlags = @"com.opensource.os
 -(NSString *)dataFilePath {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
+    DicomStudy *study = [self studyObj];
+    NSString *patientID = [study valueForKey:@"patientID"];
     NSDate *date = [NSDate date];
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     NSTimeZone *timezone = [NSTimeZone timeZoneWithName:@"Asia/Seoul"];
@@ -13544,7 +13546,8 @@ static NSString * const O2PasteboardTypeEventModifierFlags = @"com.opensource.os
     [dateFormatter setDateFormat:@"yyyy-MM-dd-HH-mm"];
     NSString *dateString = [dateFormatter stringFromDate:date];
     NSMutableString *fileName = [NSMutableString string];
-    [fileName appendString: @"ROI_export_"];
+    [fileName appendString: @"ROI_"];
+    [fileName appendString: patientID];
     [fileName appendString: dateString];
     [fileName appendString: @".csv"];
      
@@ -13721,18 +13724,18 @@ static NSString * const O2PasteboardTypeEventModifierFlags = @"com.opensource.os
                         
                         for ( ROI *r in tmpRoiList)
                         {
-                            
                             NSDate *date = [NSDate date];
                             NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
                             NSTimeZone *timezone = [NSTimeZone timeZoneWithName:@"Asia/Seoul"];
                             [dateFormatter setTimeZone:timezone];
                             [dateFormatter setDateFormat:@"yyyy/MM/dd HH:mm:ss"];
                             NSString *dateString = [dateFormatter stringFromDate:date];
+                            DicomStudy *study = [self studyObj];
                             
                             NSLog(@"Name : %@", r.name );
                             NSLog(@"Slice : %lu", [dcmRoiList count] - i);
                             for( MyPoint *p in [r points]){
-                                [writeString appendString:[NSString stringWithFormat:@"%@,%lu,%@,%@, \n",r.name,[dcmRoiList count] - i,NSStringFromPoint([p point]), dateString]]; //the \n will put a newline in
+                                [writeString appendString:[NSString stringWithFormat:@"%@,%lu, %@,%@, \n",r.name,[dcmRoiList count] - i, NSStringFromPoint([p point]), dateString]]; //the \n will put a newline in
                                 
                             }
                             
